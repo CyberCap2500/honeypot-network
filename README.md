@@ -1,8 +1,6 @@
 # MirageNet
 
-<div align="center">
-  <img src="miragenetlogo.png" alt="MirageNet Logo" width="200"/>
-</div>
+
 
 <div align="center">
 
