@@ -1,0 +1,78 @@
+# ©AngelaMos | 2026
+# compose.yml
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-miragenet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-miragenet}
+      POSTGRES_DB: ${POSTGRES_DB:-miragenet}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-miragenet}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/go.prod
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MIRAGE_DATABASE_URL: postgres://${POSTGRES_USER:-miragenet}:${POSTGRES_PASSWORD:-miragenet}@postgres:5432/${POSTGRES_DB:-miragenet}?sslmode=disable
+      MIRAGE_REDIS_URL: redis://redis:6379
+      MIRAGE_SENSOR_ID: ${MIRAGE_SENSOR_ID:-mirage-01}
+      MIRAGE_SENSOR_REGION: ${MIRAGE_SENSOR_REGION:-local}
+      MIRAGE_LOG_LEVEL: ${MIRAGE_LOG_LEVEL:-info}
+      MIRAGE_GEOIP_DB_PATH: /usr/share/GeoIP/GeoLite2-City.mmdb
+      MIRAGE_CORS_ORIGINS: ${MIRAGE_CORS_ORIGINS:-http://localhost,http://localhost:3000}
+    ports:
+      - "${MIRAGE_SSH_PORT:-2211}:2222"
+      - "${MIRAGE_HTTP_PORT:-8055}:8080"
+      - "${MIRAGE_FTP_PORT:-21272}:2121"
+      - "${MIRAGE_SMB_PORT:-46353}:4450"
+      - "${MIRAGE_MYSQL_PORT:-33077}:3307"
+      - "${MIRAGE_REDIS_PORT:-44801}:6380"
+    volumes:
+      - replays:/data/replays
+      - hostkeys:/data
+      - geoipdata:/usr/share/GeoIP
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infra/docker/vite.prod
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "${DASHBOARD_PORT:-7119}:80"
+
+volumes:
+  pgdata:
+  redisdata:
+  replays:
+  hostkeys:
+  geoipdata:

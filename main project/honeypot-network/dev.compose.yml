@@ -1,0 +1,88 @@
+# ©AngelaMos | 2026
+# dev.compose.yml
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: miragenet
+      POSTGRES_PASSWORD: miragenet
+      POSTGRES_DB: miragenet
+    ports:
+      - "53743:5432"
+    volumes:
+      - dev-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miragenet"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.4-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - "16329:6379"
+    volumes:
+      - ./infra/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - dev-redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/go.dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      MIRAGE_DATABASE_URL: postgres://miragenet:miragenet@postgres:5432/miragenet?sslmode=disable
+      MIRAGE_REDIS_URL: redis://redis:6379
+      MIRAGE_SENSOR_ID: mirage-dev
+      MIRAGE_LOG_LEVEL: debug
+      MIRAGE_GEOIP_DB_PATH: /usr/share/GeoIP/GeoLite2-City.mmdb
+      MIRAGE_CORS_ORIGINS: "http://localhost:5173,http://localhost:3000"
+    ports:
+      - "1262:2222"
+      - "8339:8080"
+      - "2633:2121"
+      - "4459:4450"
+      - "3344:3307"
+      - "6355:6380"
+      - "2323:2323"
+      - "8184:8000"
+    volumes:
+      - .:/app
+      - dev-gomod:/go/pkg/mod
+      - dev-gocache:/root/.cache/go-build
+      - dev-replays:/data/replays
+      - dev-hostkeys:/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infra/docker/vite.dev
+    depends_on:
+      - backend
+    environment:
+      VITE_API_TARGET: http://backend:8000
+      VITE_WS_TARGET: ws://backend:8000
+    ports:
+      - "56722:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  dev-pgdata:
+  dev-redisdata:
+  dev-gomod:
+  dev-gocache:
+  dev-replays:
+  dev-hostkeys:
