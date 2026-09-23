@@ -497,13 +497,13 @@ $ curl http://localhost:8184/api/health
    - Full RFC 854 compliance
    - State machine for IAC handling
    - Shell command emulation
-   - Not present in source "Hive" project
+   - Not present in source project
 
 2. **Risk Scoring Algorithm**
    - 5-factor weighted analysis
    - Behavioral pattern detection
    - Historical tracking
-   - Not present in source "Hive" project
+   - Not present in source project
 
 3. **Malicious Command Detection**
    - 15 suspicious patterns

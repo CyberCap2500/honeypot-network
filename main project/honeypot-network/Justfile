@@ -6,7 +6,7 @@ set shell := ["bash", "-uc"]
 
 project := file_name(justfile_directory())
 version := `git describe --tags --always 2>/dev/null || echo "dev"`
-binary := "hive"
+binary := "mirage"
 
 # =============================================================================
 # Default
@@ -72,23 +72,23 @@ check: lint vet
 
 [group('dev')]
 run *ARGS:
-    go run ./cmd/hive {{ARGS}}
+    go run ./cmd/mirage {{ARGS}}
 
 [group('dev')]
 dev-serve:
-    go run ./cmd/hive serve --config config.yaml
+    go run ./cmd/mirage serve --config config.yaml
 
 [group('dev')]
 dev-serve-verbose:
-    go run ./cmd/hive serve --config config.yaml --verbose
+    go run ./cmd/mirage serve --config config.yaml --verbose
 
 [group('dev')]
 dev-keygen:
-    go run ./cmd/hive keygen
+    go run ./cmd/mirage keygen
 
 [group('dev')]
 dev-version:
-    go run ./cmd/hive version
+    go run ./cmd/mirage version
 
 # =============================================================================
 # Build (Production)
@@ -96,21 +96,21 @@ dev-version:
 
 [group('prod')]
 build:
-    go build -ldflags="-s -w" -o bin/{{binary}} ./cmd/hive
+    go build -ldflags="-s -w" -o bin/{{binary}} ./cmd/mirage
     @echo "Built: bin/{{binary}} ($(du -h bin/{{binary}} | cut -f1))"
 
 [group('prod')]
 build-static:
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/{{binary}} ./cmd/hive
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o bin/{{binary}} ./cmd/mirage
     @echo "Built static: bin/{{binary}} ($(du -h bin/{{binary}} | cut -f1))"
 
 [group('prod')]
 build-debug:
-    go build -o bin/{{binary}} ./cmd/hive
+    go build -o bin/{{binary}} ./cmd/mirage
 
 [group('prod')]
 install:
-    go install ./cmd/hive
+    go install ./cmd/mirage
 
 # =============================================================================
 # Database
@@ -118,15 +118,15 @@ install:
 
 [group('db')]
 migrate *ARGS:
-    go run ./cmd/hive migrate up {{ARGS}}
+    go run ./cmd/mirage migrate up {{ARGS}}
 
 [group('db')]
 migrate-down:
-    go run ./cmd/hive migrate down
+    go run ./cmd/mirage migrate down
 
 [group('db')]
 migrate-status:
-    go run ./cmd/hive migrate status
+    go run ./cmd/mirage migrate status
 
 # =============================================================================
 # Docker

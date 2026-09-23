@@ -21,15 +21,15 @@ banner() {
     printf "\n"
     printf "${CYAN}"
     cat <<'EOF'
-  ██╗  ██╗██╗██╗   ██╗███████╗
-  ██║  ██║██║██║   ██║██╔════╝
-  ███████║██║██║   ██║█████╗
-  ██╔══██║██║╚██╗ ██╔╝██╔══╝
-  ██║  ██║██║ ╚████╔╝ ███████╗
-  ╚═╝  ╚═╝╚═╝  ╚═══╝  ╚══════╝
+  ███╗   ███╗██╗██████╗  █████╗  ██████╗ ███████╗███╗   ██╗███████╗████████╗
+  ████╗ ████║██║██╔══██╗██╔══██╗██╔════╝ ██╔════╝████╗  ██║██╔════╝╚══██╔══╝
+  ██╔████╔██║██║██████╔╝███████║██║  ███╗█████╗  ██╔██╗ ██║█████╗     ██║   
+  ██║╚██╔╝██║██║██╔══██╗██╔══██║██║   ██║██╔══╝  ██║╚██╗██║██╔══╝     ██║   
+  ██║ ╚═╝ ██║██║██║  ██║██║  ██║╚██████╔╝███████╗██║ ╚████║███████╗   ██║   
+  ╚═╝     ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚══════╝   ╚═╝   
 EOF
     printf "${NC}"
-    printf "  ${DIM}honeypot network installer${NC}\n"
+    printf "  ${DIM}miragenet installer${NC}\n"
     printf "\n"
 }
 
@@ -90,16 +90,16 @@ check_just() {
 }
 
 build_and_install() {
-    info "Building hive binary..."
+    info "Building mirage binary..."
     go mod tidy
-    go build -ldflags="-s -w" -o bin/hive ./cmd/hive
+    go build -ldflags="-s -w" -o bin/mirage ./cmd/mirage
     local size
-    size=$(du -h bin/hive | cut -f1)
-    ok "Built bin/hive ($size)"
+    size=$(du -h bin/mirage | cut -f1)
+    ok "Built bin/mirage ($size)"
 
-    info "Installing hive to GOPATH..."
-    go install -ldflags="-s -w" ./cmd/hive
-    ok "Installed hive → $(go env GOPATH)/bin/hive"
+    info "Installing mirage to GOPATH..."
+    go install -ldflags="-s -w" ./cmd/mirage
+    ok "Installed mirage → $(go env GOPATH)/bin/mirage"
 }
 
 install_frontend() {
@@ -138,7 +138,7 @@ main() {
     printf "\n"
     ok "Setup complete"
     printf "\n"
-    printf "  ${DIM}Verify:${NC}            hive version\n"
+    printf "  ${DIM}Verify:${NC}            mirage version\n"
     printf "  ${DIM}Run with Docker:${NC}   just dev-up\n"
     printf "  ${DIM}Run locally:${NC}       just dev-serve\n"
     printf "  ${DIM}Run frontend:${NC}      cd frontend && pnpm dev\n"
